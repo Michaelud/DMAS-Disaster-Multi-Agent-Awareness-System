@@ -1,0 +1,143 @@
+========================================================================
+  DMAS — Disaster Multi-Agent Awareness System [FIXED PRODUCTION]
+  Lagos State Flood Simulation — December 2024
+  Author: Michael Michael Udofia
+  3,000 Synthetic Data Points | Empirically Grounded
+========================================================================
+
+────────────────────────────────────────────────────────────────────────
+  LAYER 1 — INGESTION AGENT
+────────────────────────────────────────────────────────────────────────
+
+  ✓ Social Media Posts  : 2,000
+  ✓ IoT Sensor Readings : 590
+  ✓ 311/LASEMA Calls    : 398
+  ✓ TOTAL Data Points   : 2,988
+
+  Weather Context (NIMET Dec 2024):
+    Rainfall (1h)  : 48.7 mm/h
+    Rainfall (24h) : 187.2 mm
+    Tidal Surge    : 122 cm above normal
+    Conditions     : Heavy tropical rainfall with tidal surge
+
+  Tweet Classification:
+    Distress     : 1,170 (58.5%)
+    Misinformation: 345 (17.2%)
+    Noise         : 485 (24.2%)
+
+────────────────────────────────────────────────────────────────────────
+  LAYER 2 — CROSS-MODAL VERIFICATION AGENT
+  Sc(r) = Σ(wi·ki) / Σ(wi)
+  Weights: IoT=0.9, Gov=0.75, Social=0.4
+────────────────────────────────────────────────────────────────────────
+
+  LGA                        Sc  Gate           k_phys  k_gov  k_soc
+  ────────────────────── ──────  ────────────  ─────── ────── ──────
+  ✅ Ajegunle              0.900  TRUST           0.925  0.918  0.810
+  ⚠️  Ketu                  0.818  UNCERTAINTY     0.892  0.754  0.775
+  ⚠️  Surulere              0.740  UNCERTAINTY     0.717  0.752  0.770
+  ✅ Lagos Island          0.889  TRUST           0.911  0.900  0.818
+  ✅ Ikorodu               0.898  TRUST           0.932  0.907  0.805
+  🚫 Victoria Island       0.497  SUPPRESSED      0.141  0.838  0.662
+  ⚠️  Lekki Phase 1         0.528  UNCERTAINTY     0.273  0.767  0.654
+  ✅ Mile 12 / Owode       0.911  TRUST           0.959  0.900  0.822
+
+  Gate Summary: ✅ TRUST: 4  ⚠️  UNCERTAINTY: 3  🚫 SUPPRESSED: 1
+
+────────────────────────────────────────────────────────────────────────
+  EVALUATION METRICS — VERIFICATION LAYER (Layer 2)
+────────────────────────────────────────────────────────────────────────
+
+  Confusion Matrix:
+    True Positives  (TP) — distress forwarded correctly : 752
+    False Positives (FP) — misinfo forwarded incorrectly: 405
+    True Negatives  (TN) — misinfo blocked correctly    : 99
+    False Negatives (FN) — distress missed/blocked      : 33
+
+  Performance Metrics:
+    Precision   : 0.6500  (65.00%)
+    Recall      : 0.9580  (95.80%)
+    F1-Score    : 0.7745  (77.45%)
+    Accuracy    : 0.4255  (42.55%)
+    Specificity : 0.1964  (19.64%)
+
+  Misinformation suppression rate : 11.9%
+  True-positive forwarding rate   : 64.3%
+
+────────────────────────────────────────────────────────────────────────
+  LAYER 3 — GEOSPATIAL SYNTHESIS AGENT
+  CDSS(j,t) = 0.5·S + 0.3·V + 0.2·HI
+────────────────────────────────────────────────────────────────────────
+
+  Rank  LGA                      CDSS      S     V    HI  Severity            Persons
+  ───── ────────────────────── ──────  ───── ───── ─────  ──────────────── ──────────
+  #1    Ajegunle                0.914  0.900 0.920 0.938  🔴 CATASTROPHIC       52,440
+  #2    Mile 12 / Owode         0.911  0.911 0.850 1.000  🔴 CATASTROPHIC       44,460
+  #3    Ikorodu                 0.887  0.898 0.820 0.962  🔴 CATASTROPHIC       47,310
+  #4    Lagos Island            0.882  0.889 0.880 0.866  🔴 CATASTROPHIC       36,480
+  #5    Ketu                    0.813  0.818 0.800 0.818  🔴 CATASTROPHIC       40,470
+  #6    Surulere                0.701  0.740 0.750 0.530  🟠 CRITICAL           33,060
+  #7    Lekki Phase 1           0.488  0.528 0.500 0.370  🟡 MODERATE           11,970
+  #8    Victoria Island         0.399  0.497 0.350 0.230  🟡 MODERATE            5,130
+
+────────────────────────────────────────────────────────────────────────
+  LAYER 4 — DEPLOYMENT PRIORITIZATION AGENT
+────────────────────────────────────────────────────────────────────────
+
+  🔴 Ajegunle                CDSS: 0.914  CATASTROPHIC  
+       Persons: 52,440  →  🚤 Rescue Boat, 🏥 Medical Unit, 🚌 Evacuation Bus, 🚁 UAV
+
+  🔴 Mile 12 / Owode         CDSS: 0.911  CATASTROPHIC  
+       Persons: 44,460  →  🚤 Rescue Boat, 🏥 Medical Unit, 🚌 Evacuation Bus, 🚁 UAV
+
+  🔴 Ikorodu                 CDSS: 0.887  CATASTROPHIC  
+       Persons: 47,310  →  🚤 Rescue Boat, 🏥 Medical Unit, 🚌 Evacuation Bus, 🚁 UAV
+
+  🔴 Lagos Island            CDSS: 0.882  CATASTROPHIC  
+       Persons: 36,480  →  🚤 Rescue Boat, 🏥 Medical Unit, 🚌 Evacuation Bus, 🚁 UAV
+
+  🔴 Ketu                    CDSS: 0.813  CATASTROPHIC  
+       Persons: 40,470  →  🚤 Rescue Boat, 🚌 Evacuation Bus, 🚁 UAV
+
+  🟠 Surulere                CDSS: 0.701  CRITICAL      
+       Persons: 33,060  →  🚤 Rescue Boat, 🚌 Evacuation Bus, 🚁 UAV
+
+  🟡 Lekki Phase 1           CDSS: 0.488  MODERATE      
+       Persons: 11,970  →  🚁 UAV
+
+  🟡 Victoria Island         CDSS: 0.399  MODERATE      
+       Persons: 5,130  →  🚁 UAV
+
+========================================================================
+  EXPERIMENTAL RESULTS SUMMARY
+========================================================================
+
+  Dataset:          2,988 synthetic data points (8 LGAs)
+  Social Media:     2,000 posts  |  IoT Sensors: 590  |  Calls: 398
+
+  Verification (Layer 2):
+    Precision   : 0.6500
+    Recall      : 0.9580
+    F1-Score    : 0.7745
+    Accuracy    : 0.4255
+    Specificity : 0.1964
+
+  CDSS Rankings (Layer 3):
+    #1 Ajegunle               CDSS=0.914  🔴 CATASTROPHIC
+    #2 Mile 12 / Owode        CDSS=0.911  🔴 CATASTROPHIC
+    #3 Ikorodu                CDSS=0.887  🔴 CATASTROPHIC
+    #4 Lagos Island           CDSS=0.882  🔴 CATASTROPHIC
+    #5 Ketu                   CDSS=0.813  🔴 CATASTROPHIC
+    #6 Surulere               CDSS=0.701  🟠 CRITICAL
+    #7 Lekki Phase 1          CDSS=0.488  🟡 MODERATE
+    #8 Victoria Island        CDSS=0.399  🟡 MODERATE
+
+  Deployment (Layer 4):
+    Ground truth (IOM DTM/NEMA): 275,621 persons
+    DMAS simulated affected     : 271,320 persons
+    Persons covered by dispatch : 271,320
+    Population coverage rate    : 100.0%
+
+========================================================================
+  Simulation complete. Generating charts...
+========================================================================
