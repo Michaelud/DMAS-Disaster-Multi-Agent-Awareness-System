@@ -348,31 +348,65 @@ def severity_label(cdss):
 # EVALUATION METRICS
 # ─────────────────────────────────────────────────────────────────────────
 def compute_metrics(tweets, sc_results):
-    suppressed_lgas = [nb for nb, r in sc_results.items() if r["gate"] == "SUPPRESSED"]
-    trust_lgas      = [nb for nb, r in sc_results.items() if r["gate"] == "TRUST"]
-    uncertainty_lgas= [nb for nb, r in sc_results.items() if r["gate"] == "UNCERTAINTY"]
+    # ── ALL YOUR ORIGINAL CODE STAYS ────────────────────────────────────
+    suppressed_lgas  = [nb for nb, r in sc_results.items() if r["gate"] == "SUPPRESSED"]
+    trust_lgas       = [nb for nb, r in sc_results.items() if r["gate"] == "TRUST"]
+    uncertainty_lgas = [nb for nb, r in sc_results.items() if r["gate"] == "UNCERTAINTY"]
 
     total_distress = sum(1 for t in tweets if t["type"] == "distress")
     total_misinfo  = sum(1 for t in tweets if t["type"] in ("misinformation", "noise"))
 
-    # True Positives: distress tweets in TRUST zones (correctly forwarded)
-    TP = sum(1 for t in tweets if t["lga"] in trust_lgas and t["type"] == "distress")
-    # False Negatives: distress tweets in SUPPRESSED zones (missed)
+    TP = sum(1 for t in tweets if t["lga"] in trust_lgas      and t["type"] == "distress")
     FN = sum(1 for t in tweets if t["lga"] in suppressed_lgas and t["type"] == "distress")
-    # True Negatives: misinfo/noise in SUPPRESSED zones (correctly blocked)
     TN = sum(1 for t in tweets if t["lga"] in suppressed_lgas and t["type"] in ("misinformation","noise"))
-    # False Positives: misinfo/noise in TRUST zones (incorrectly forwarded)
-    FP = sum(1 for t in tweets if t["lga"] in trust_lgas and t["type"] in ("misinformation","noise"))
+    FP = sum(1 for t in tweets if t["lga"] in trust_lgas      and t["type"] in ("misinformation","noise"))
 
-    precision = round(TP / (TP + FP), 4) if (TP + FP) > 0 else 0
-    recall    = round(TP / (TP + FN), 4) if (TP + FN) > 0 else 0
-    f1        = round(2 * precision * recall / (precision + recall), 4) if (precision + recall) > 0 else 0
-    accuracy  = round((TP + TN) / len(tweets), 4) if tweets else 0
+    precision   = round(TP / (TP + FP), 4) if (TP + FP) > 0 else 0
+    recall      = round(TP / (TP + FN), 4) if (TP + FN) > 0 else 0
+    f1          = round(2 * precision * recall / (precision + recall), 4) if (precision + recall) > 0 else 0
+    accuracy    = round((TP + TN) / len(tweets), 4) if tweets else 0
     specificity = round(TN / (TN + FP), 4) if (TN + FP) > 0 else 0
 
     suppression_rate = round(TN / total_misinfo * 100, 1) if total_misinfo > 0 else 0
     tp_rate          = round(TP / total_distress * 100, 1) if total_distress > 0 else 0
 
+    # ── NEW SENSITIVITY BLOCK — ADD THIS RIGHT HERE ──────────────────────
+    import numpy as np
+    genuine_scores = []
+    noise_scores   = []
+    for t in tweets:
+        lga_sc = sc_results[t["lga"]]["sc"]
+        if t["type"] == "distress":
+            genuine_scores.append(lga_sc)
+        else:
+            noise_scores.append(lga_sc)
+
+    genuine_scores = np.array(genuine_scores)
+    noise_scores   = np.array(noise_scores)
+
+    print("\n" + "─"*72)
+    print("  SENSITIVITY ANALYSIS — SUPPRESSION THRESHOLD (τ_s)")
+    print("  Varying τ_s from 0.35 to 0.75 | Trust gate fixed at 0.85")
+    print("─"*72)
+    print(f"  {'τ_s':>5} {'TP':>5} {'FP':>5} {'TN':>5} {'FN':>5} "
+          f"{'Prec':>7} {'Recall':>7} {'F1':>7} {'Spec':>7}")
+    print("  " + "─"*60)
+
+    for tau in np.arange(0.35, 0.76, 0.05):
+        sTP = int((genuine_scores >= tau).sum())
+        sFN = int((genuine_scores <  tau).sum())
+        sFP = int((noise_scores   >= tau).sum())
+        sTN = int((noise_scores   <  tau).sum())
+        sP  = sTP/(sTP+sFP) if (sTP+sFP) > 0 else 0
+        sR  = sTP/(sTP+sFN) if (sTP+sFN) > 0 else 0
+        sF1 = 2*sP*sR/(sP+sR) if (sP+sR) > 0 else 0
+        sSp = sTN/(sTN+sFP) if (sTN+sFP) > 0 else 0
+        mark = "  <-- selected" if abs(tau - 0.50) < 0.001 else ""
+        print(f"  {tau:>5.2f} {sTP:>5} {sFP:>5} {sTN:>5} {sFN:>5} "
+              f"{sP:>7.4f} {sR:>7.4f} {sF1:>7.4f} {sSp:>7.4f}{mark}")
+    # ── END NEW BLOCK ─────────────────────────────────────────────────────
+
+    # ── YOUR ORIGINAL RETURN STAYS EXACTLY AS IS ─────────────────────────
     return {
         "TP": TP, "FP": FP, "TN": TN, "FN": FN,
         "precision": precision, "recall": recall, "f1": f1,
